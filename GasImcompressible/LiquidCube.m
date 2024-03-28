@@ -14,6 +14,7 @@ classdef LiquidCube < handle
         Vx0 = [];
         Vy0 = [];
         blockMatrix = [];
+
     end
     
     methods
@@ -28,28 +29,59 @@ classdef LiquidCube < handle
             obj.Vy = zeros(N);
             obj.Vx0 = zeros(N);
             obj.Vy0 = zeros(N);
-            obj.blockMatrix = zeros(N);
-            obj.blockMatrix(1, :) = 1;
-            obj.blockMatrix(N, :) = 1;
-            obj.blockMatrix(:, 1) = 1;
-            obj.blockMatrix(:, N) = 1;
+            obj.blockMatrix = obj.setMatrix(N);
+        end
+        
+
+        function blockMatrix = setMatrix(obj,N)
+            blockMatrix = zeros(N);
+            blockMatrix(1, :) = 1;
+            blockMatrix(N, :) = 1;
+            blockMatrix(:, 1) = 1;
+            blockMatrix(:, N) = 1;
         end
 
+
         function step(obj)
+            
+            
             obj.Vx0 = obj.diffuse(1,obj.Vx0,obj.Vx,obj.visc,obj.dt);
             obj.Vy0 = obj.diffuse(1,obj.Vy0,obj.Vy,obj.visc,obj.dt);
+            
             [obj.Vx0,obj.Vy0,obj.Vx,obj.Vy] = obj.project(obj.Vx0,obj.Vy0,obj.Vx,obj.Vy);
             
-            obj.Vx = obj.advect(1,obj.Vx,obj.Vx0,obj.Vx0,obj.Vy0,obj.dt);
+            obj.Vx =obj.advect(1,obj.Vx,obj.Vx0,obj.Vx0,obj.Vy0,obj.dt);
+            
             obj.Vy = obj.advect(2,obj.Vy,obj.Vy0,obj.Vx0,obj.Vy0,obj.dt);
 
-
             [obj.Vx,obj.Vy,obj.Vx0,obj.Vy0] = obj.project(obj.Vx,obj.Vy,obj.Vx0,obj.Vy0);
+
+
             obj.s = obj.diffuse(0,obj.s,obj.density,obj.diff,obj.dt);
             obj.density = obj.advect(0, obj.density, obj.s, obj.Vx, obj.Vy, obj.dt);
             obj.density = obj.fadeON(obj.density);
         end
         
+
+
+
+        function modifyBlock(obj,ammount)
+            [row, col] = size(obj.blockMatrix);
+            obj.blockMatrix = zeros(row);
+            obj.blockMatrix(1, :) = 1;
+            obj.blockMatrix(row, :) = 1;
+            obj.blockMatrix(:, 1) = 1;
+            obj.blockMatrix(:, row) = 1;
+            for i = 1:row
+                for j = 1:col
+                    if ammount(i,j)==1
+                        obj.blockMatrix(i, j) = ammount(i,j);
+                    end
+                end
+            end
+        end
+
+
         function addDensity(obj,x,y,ammount)
             obj.density(x,y) = obj.density(x,y)+ammount;
         end
@@ -61,6 +93,7 @@ classdef LiquidCube < handle
 
         function x = diffuse(obj,b,x,x0,diff,dt)
             a = dt * diff * (obj.size);
+
             x=obj.lin_solve(b,x,x0,a,1+6*a);
 
         end
@@ -71,7 +104,11 @@ classdef LiquidCube < handle
             for k = 1:4
                 for i = 2:row-1
                     for j = 2:col-1
-                        x(i, j) = (x0(i, j) + a * (x(i-1, j) + x(i+1, j) + x(i, j-1) + x(i, j+1))) * cRecip;
+                        if obj.blockMatrix(i,j)==0
+                            x(i, j) = (x0(i, j) + a * (x(i-1, j) + x(i+1, j) + x(i, j-1) + x(i, j+1))) * cRecip;
+                        else
+                            x(i,j)=0;
+                        end
                     end
                 end
                 
@@ -80,33 +117,16 @@ classdef LiquidCube < handle
         end
 
         function x = set_bnd(obj, b, x)
-            [row, col] = size(x);
-            x_copy = x;
-            if b == 1
-                x_copy(1, :) = -x_copy(2, :);
-                x_copy(row, :) = -x_copy(row-1, :);
-            else
-                x_copy(1, :) = x_copy(2, :);
-                x_copy(row, :) = x_copy(row-1, :);
-            end
-        
-            if b == 2
-                x_copy(:, 1) = -x_copy(:, 2);
-                x_copy(:, col) = -x_copy(:, col-1);
-            else
-                x_copy(:, 1) = x_copy(:, 2);
-                x_copy(:, col) = x_copy(:, col-1);
-            end
-        
-            for i = 1:row
-                for j = 1:col
-                    if obj.blockMatrix(i, j) == 1
-                        x_copy(i, j) = x(i, j);
+            N = obj.size;
+            for i = 1:N
+                for j = 1:N
+                    if obj.blockMatrix(i,j) == 1
+                        x(i, j) = -pi*x(i,j);
                     end
                 end
-            end        
-            x = x_copy;
+            end
         end
+
 
 
         function d = advect(obj, b, d, d0, velocX, velocY, dt)
@@ -142,6 +162,9 @@ classdef LiquidCube < handle
             d = obj.set_bnd(b, d);
         end
 
+
+
+
         function [velocX, velocY, p, div] = project(obj, velocX, velocY, p, div)
             N=obj.size;
             div(2:end-1, 2:end-1) = -0.5 * ((velocX(3:end, 2:end-1) - velocX(1:end-2, 2:end-1)) + ...
@@ -164,14 +187,12 @@ classdef LiquidCube < handle
             for row = 1:N
                 for col = 1:N
                     d = density(row, col);
-                    h = d - (1e-10);
+                    h = d - (1e-4);
                     density(row, col) = max(0, min(h, 1));
                 end
             end
         end
 
 
-
     end
 end
-
