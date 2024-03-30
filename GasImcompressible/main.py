@@ -11,7 +11,7 @@ HEIGHT = N*CELL_SIZE
 # Defina o tamanho do tabuleiro
 
 
-cube = FluidCube(0.2, 0, 0)
+cube = FluidCube(3, 3.14, 0)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -71,8 +71,8 @@ def main():
 			x = int(x)
 			y = int(y)
 			cube.FluidCubeAddDensity(y, x, 1)
-			x_prev = x-(x + np.random.uniform(-2, 2))
-			y_prev = y-(y + np.random.uniform(-2, 2))
+			x_prev = x-(x + -2)
+			y_prev = y-(y + -2)
 			cube.FluidCubeAddVelocity(y, x, x_prev*10 ,y_prev*10 )
 
 		screen.fill((0, 0, 0))

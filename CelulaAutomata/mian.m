@@ -7,7 +7,7 @@ columns = 32;
 
 grid = zeros(rows, columns);
 grid_direction = cell(rows, columns);
-grid(31,2)=20;
+grid(31,2)=100;
 thresholds = linspace(0,1,10);
 A= size(thresholds);
 

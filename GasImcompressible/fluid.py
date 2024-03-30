@@ -51,7 +51,7 @@ class FluidCube:
 	def lin_solve(self, b, x, x0, a, c):
 		cRecip = 1.0 / c
 		for k in range(iter):
-			x[1:-1, 1:-1] = (x0[1:-1, 1:-1] + a * (x[:-2, 1:-1] + x[2:, 1:-1] + x[1:-1, :-2] + x[1:-1, 2:])) * cRecip
+			x[1:-1, 1:-1] = (x0[1:-1, 1:-1] + a * (x[:-2, 1:-1] + x[2:, 1:-1] + x[1:-1, :-2] + x[1:-1, 2:])) *cRecip
 			self.set_bnd(b, x)
 
 	def diffuse(self, b, x, x0, diff, dt):
