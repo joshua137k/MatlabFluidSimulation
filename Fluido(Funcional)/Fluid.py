@@ -124,6 +124,7 @@ def advect(b, d, d0, velocX, velocY, dt):
                           s1 * (t0 * d0[i1, j0] + t1 * d0[i1, j1])
 
     set_bnd(b, d)
+    
 
 def set_bnd(b, x):
     for i in range(1, N - 1):
