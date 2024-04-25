@@ -29,7 +29,6 @@ classdef Fluid < handle
             obj.Vy = zeros(N);
             obj.Vx0 = zeros(N);
             obj.Vy0 = zeros(N);
-            obj.block = zeros(N);
         end
 
         function setBlock(obj,b)
@@ -96,9 +95,9 @@ classdef Fluid < handle
             p = obj.lin_solve(0, p, div, 1, 6);
             for i=2:N-1
                 for j=2:N-1
-                    velocX(i, j) = velocX(i, j) - 0.5 * (p(i + 1, j) - p(i - 1, j)) * N;
-                    velocY(i, j) =velocY(i, j)- 0.5 * (p(i, j + 1) - p(i, j - 1)) * N;
-
+                    %POde dar error aqui
+                    velocX(i, j) = (velocX(i, j) - 0.5 * (p(i + 1, j) - p(i - 1, j)) * N;
+                    velocY(i, j) =(velocY(i, j)- 0.5 * (p(i, j + 1) - p(i, j - 1))) * N;
                 end
             end
 
