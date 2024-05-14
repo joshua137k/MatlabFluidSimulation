@@ -36,6 +36,16 @@ classdef Fluid < handle
             obj.block=b; 
         end
 
+        function setDens(obj,d)
+            obj.density=d;
+        end
+
+        function setVxVy(obj,vx,vy)
+            obj.Vx=vx;
+            obj.Vy=vy;
+        end
+
+
         function addDensity(obj,x,y,ammount)
             obj.density(x,y) = obj.density(x,y)+ammount;
         end

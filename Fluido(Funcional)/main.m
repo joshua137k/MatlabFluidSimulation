@@ -30,7 +30,7 @@ for t=0:maxIterations
     fluid.setBlock(MatrixCube)
 	fluid.step();
     image = fluid.density+MatrixCube;
-    imagesc(image);
+    contourf(image);
     colormap(gray);
     drawnow
 
